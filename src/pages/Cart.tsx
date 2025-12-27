@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const Cart = () => {
   const { items, removeItem, updateQuantity, getTotalPrice } =
@@ -24,6 +25,7 @@ const Cart = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <Breadcrumbs items={[{ label: 'Shopping Cart' }]} />
       <h1 className="text-5xl font-extrabold mb-10 gradient-text">Shopping Cart</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
@@ -74,7 +76,7 @@ const Cart = () => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xl font-bold">
+                <p className="text-2xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
                   ${(item.product.price * item.quantity).toFixed(2)}
                 </p>
               </div>

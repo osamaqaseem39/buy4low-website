@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
-import { getProduct } from '../api/products';
+import { getProduct, getProducts } from '../api/products';
 import { useCartStore } from '../store/cartStore';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../components/Breadcrumbs';
+import ProductCard from '../components/ProductCard';
+import TrustBadges from '../components/TrustBadges';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +22,20 @@ const ProductDetail = () => {
 
   const product = data?.data;
 
+  // Fetch related products
+  const { data: relatedProductsData } = useQuery(
+    ['related-products', product?.category?._id],
+    () => getProducts({ 
+      category: product?.category?._id, 
+      limit: 8
+    }),
+    { enabled: !!product?.category?._id }
+  );
+
+  const relatedProducts = (relatedProductsData?.data || []).filter(
+    (p: any) => p._id !== id
+  ).slice(0, 4);
+
   const handleAddToCart = () => {
     if (product && !product.isAffiliate) {
       addItem(product, quantity);
@@ -30,8 +47,8 @@ const ProductDetail = () => {
     if (product?.affiliateLink) {
       // Add affiliate tag if needed
       const url = new URL(product.affiliateLink);
-      if (process.env.VITE_AMAZON_ASSOCIATE_TAG) {
-        url.searchParams.set('tag', process.env.VITE_AMAZON_ASSOCIATE_TAG);
+      if (import.meta.env.VITE_AMAZON_ASSOCIATE_TAG) {
+        url.searchParams.set('tag', import.meta.env.VITE_AMAZON_ASSOCIATE_TAG);
       }
       window.open(url.toString(), '_blank');
     }
@@ -55,11 +72,13 @@ const ProductDetail = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="mb-6">
-        <Link to="/products" className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium transition-colors group">
-          <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Products
-        </Link>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: 'Products', to: '/products' },
+          ...(product?.category ? [{ label: product.category.name, to: `/category/${product.category.slug}` }] : []),
+          { label: product?.name || 'Product' },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Images */}
@@ -272,16 +291,34 @@ const ProductDetail = () => {
 
       {/* Tags */}
       {product.tags && product.tags.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Tags</h2>
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-12">
+          <h2 className="text-3xl font-extrabold mb-6 gradient-text">Tags</h2>
+          <div className="flex flex-wrap gap-3">
             {product.tags.map((tag: string) => (
-              <span
+              <Link
                 key={tag}
-                className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm"
+                to={`/products?search=${encodeURIComponent(tag)}`}
+                className="bg-gradient-to-r from-primary-100 to-accent-100 text-primary-800 px-4 py-2 rounded-full text-sm font-medium hover:from-primary-200 hover:to-accent-200 transition-colors border border-primary-200"
               >
-                {tag}
-              </span>
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trust Badges */}
+      <TrustBadges />
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-4xl font-extrabold mb-8 gradient-text text-center">
+            You May Also Like
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((relatedProduct: any) => (
+              <ProductCard key={relatedProduct._id} product={relatedProduct} />
             ))}
           </div>
         </div>

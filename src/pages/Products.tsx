@@ -1,17 +1,21 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { getProducts, GetProductsParams } from '../api/products';
 import { getCategories } from '../api/categories';
 import { Product, Category } from '../types';
+import ProductCard from '../components/ProductCard';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const Products = () => {
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState<GetProductsParams>({
     page: 1,
     limit: 12,
     sort: '-createdAt',
+    search: searchParams.get('search') || undefined,
   });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
 
   const { data: productsData, isLoading } = useQuery(
     ['products', filters],
@@ -43,6 +47,7 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <Breadcrumbs items={[{ label: 'Products' }]} />
       <div className="mb-10">
         <h1 className="text-5xl font-extrabold mb-4 gradient-text">All Products</h1>
         <p className="text-gray-600 text-lg">Browse through our complete collection</p>
@@ -132,49 +137,7 @@ const Products = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
-                  <Link
-                    key={product._id}
-                    to={`/products/${product._id}`}
-                    className="card-hover group"
-                  >
-                    <div className="relative overflow-hidden rounded-xl mb-4 h-48 bg-gradient-to-br from-gray-100 to-gray-200">
-                      <img
-                        src={product.thumbnail || product.images[0] || '/placeholder.jpg'}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      {product.isAffiliate && (
-                        <span className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                          Affiliate
-                        </span>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <h3 className="font-bold text-lg mb-2 line-clamp-2 text-gray-800 group-hover:text-primary-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    {product.shortDescription && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {product.shortDescription}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        {product.compareAtPrice &&
-                          product.compareAtPrice > product.price && (
-                            <span className="text-gray-400 line-through ml-2 text-sm">
-                              ${product.compareAtPrice.toFixed(2)}
-                            </span>
-                          )}
-                      </div>
-                      <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <span className="text-white text-sm">→</span>
-                      </div>
-                    </div>
-                  </Link>
+                  <ProductCard key={product._id} product={product} />
                 ))}
               </div>
 

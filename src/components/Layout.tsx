@@ -1,6 +1,8 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
+import SearchBar from './SearchBar';
+import Newsletter from './Newsletter';
 
 const Layout = () => {
   const { user, clearAuth } = useAuthStore();
@@ -31,6 +33,7 @@ const Layout = () => {
                 Products
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-600 to-secondary-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
+              <SearchBar />
               <Link
                 to="/cart"
                 className="text-gray-700 hover:text-primary-600 transition-all duration-200 relative group font-medium"
@@ -107,6 +110,9 @@ const Layout = () => {
       <main className="flex-1">
         <Outlet />
       </main>
+
+      {/* Newsletter Section */}
+      <Newsletter />
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-primary-950 text-white py-12 border-t border-gray-700/50">
