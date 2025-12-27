@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { getProducts, GetProductsParams } from '../api/products';
 import { getCategories } from '../api/categories';
